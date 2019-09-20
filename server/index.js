@@ -1,14 +1,22 @@
+require('dotenv').config()
 const express = require('express')
 const path = require('path')
+const axios = require('axios')
 
 const app = express()
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client/build')))
 
-// An api endpoint that returns a short list of items
-app.get('/api', (req, res) => {
-  res.json(['One', 'Two', 'Three'])
+app.get('/api/:term', async (req, res, next) => {
+  const { term } = req.params
+  const results = await axios.get('https://api.unsplash.com/search/photos', {
+    params: { query: term },
+    headers: {
+      Authorization: process.env.CLIENT_KEY
+    }
+  })
+  res.send(results.data)
 })
 
 // Handles any requests that don't match the ones above
